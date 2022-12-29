@@ -92,10 +92,10 @@ function plot2(a::Braid{N}; cols=HSV.((0:256/(N-1):256),1,1), bcol="black") wher
     compose(context(0,0.1,1,0.8), _plot(view(a.els,:), N, cols, bcol))
 end
 
-function Base.show(io::IO, mime::MIME"text/html", a::Braid)
-    cols = get(io, :cols, HSV.((0:N-1)./(N-1)*256,1,1))
-    bcols = get(io, :bcol, "black")
-    show(io, mime, plot(a; cols, bcols))
+function Base.show(io::IO, mime::MIME"text/html", a::Braid{N}) where N
+    cols = get(io, :cols, HSV.(0:256/(N-1):256,1,1))
+    bcol = get(io, :bcol, "black")
+    show(io, mime, plot(a; cols, bcol))
 end
 
 function Base.show(io::IO, a::Braid)
