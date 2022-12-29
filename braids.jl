@@ -60,12 +60,12 @@ function plot(a::Braid{N}; cols=HSV.((0:N-1)./(N-1)*256,1,1), bcol="black") wher
     c = compose(context(0,0.1,1,0.8), strings...)
 end
 
-function _plot(v::AbstractVector{Int}, N::Int; cols=HSV.((0:N-1)./(N-1)*256,1,1), bcol="black")
+function _plot(v::AbstractVector{Int}, N::Int, cols, bcol)
     Δt = 3mm
     isempty(v) && return context()
     l1 = curve((0,0), (0.5,0), (0.5,1),(1,1))
     l2 = curve((0,1), (0.5,1), (0.5,0),(1,0))
-    f(l; col="white", bcol="black") = compose(context(), 
+    f(l, col, bcol) = compose(context(), 
         compose(context(), l, stroke(col), linewidth(0.2mm)),
         compose(context(), l, stroke(bcol), linewidth(1mm)) 
     )
@@ -78,30 +78,64 @@ function _plot(v::AbstractVector{Int}, N::Int; cols=HSV.((0:N-1)./(N-1)*256,1,1)
         compose(context(), myline2.([j for j=1:N if j ∉ (i, i + 1)])..., stroke(bcol), linewidth(1mm)), 
         compose(context(0,(i-1)/(N-1),1,1/(N-1)), 
                 σ == 1 ? 
-                compose(context(), f(l1; col=cols[i]), f(l2; col=cols[i+1], bcol)) : 
-                compose(context(), f(l2; col=cols[i+1]), f(l1; col=cols[i], bcol))))
+                compose(context(), f(l1, cols[i], bcol), f(l2, cols[i+1], bcol)) : 
+                compose(context(), f(l2, cols[i+1], bcol), f(l1, cols[i], bcol))))
     cols[i+1], cols[i] = cols[i], cols[i+1]
-    c2 = _plot((@view v[2:end]), N; cols, bcol)
+    c2 = _plot((@view v[2:end]), N, cols, bcol)
     compose(c1, compose(context(Δt,0,Δt*(length(v)-1),1), c2))
 end
 
-function plot2(a::Braid{N}; cols=HSV.((0:N-1)./(N-1)*256,1,1), bcol="black") where N
+function plot2(a::Braid{N}; cols=HSV.((0:256/(N-1):256),1,1), bcol="black") where N
     Δt = 3mm
     set_default_graphic_size(Δt * (length(a.els) + 1), N*2mm)
     cols = copy(cols)
-    compose(context(0,0.1,1,0.8), _plot((@view a.els[1:end]), N; cols, bcol))
+    compose(context(0,0.1,1,0.8), _plot(view(a.els,:), N, cols, bcol))
 end
 
+function Base.show(io::IO, mime::MIME"text/html", a::Braid)
+    cols = get(io, :cols, HSV.((0:N-1)./(N-1)*256,1,1))
+    bcols = get(io, :bcol, "black")
+    show(io, mime, plot(a; cols, bcols))
+end
 
 function Base.show(io::IO, a::Braid)
-    print(io, prod("σ".*subscripts.(a.els)))
+    v = if get(io, :compact, false)
+        w = Tuple{Int,Int}[]
+        for x in a.els
+            i,σ = abs(x), sign(x)
+            if !isempty(w) && w[end][1] == i
+                if w[end][2]+σ == 0
+                    pop!(w)
+                else
+                    w[end] = (w[end][1],w[end][2]+σ)
+                end
+            else
+                push!(w, (i,σ))
+            end
+        end
+        w
+    else
+        [(abs(x), sign(x)) for x in a.els]
+    end
+
+    print(io, prod("σ".*subscripts.(first.(v)).*superscripts.(last.(v))))
 end
+
+
+
+function superscripts(x)
+    x == 1 && return ""
+    x, σ = abs(x), sign(x)
+    s = prod(getindex.((("⁰","¹","²","³","⁴","⁵","⁶","⁷","⁸","⁹"),), 
+                reverse(digits(x)).+1))
+    σ == 1 ? s : "⁻" * s
+end 
 
 function subscripts(x)
     x, σ = abs(x), sign(x)
     s = prod(getindex.((("₀","₁","₂","₃","₄","₅","₆","₇","₈","₉"),), 
                 reverse(digits(x)).+1))
-    σ == -1 ? s * "⁻¹" : s
- end 
+    sign(x) == 1 ? s : "₋" * s 
+end 
 
  nothing
