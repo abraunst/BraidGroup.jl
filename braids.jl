@@ -66,20 +66,18 @@ function _plot(v::AbstractVector{Int}, N::Int, cols, bcol)
     l1 = curve((0,0), (0.5,0), (0.5,1),(1,1))
     l2 = curve((0,1), (0.5,1), (0.5,0),(1,0))
     f(l, col, bcol) = compose(context(), 
-        compose(context(), l, stroke(col), linewidth(0.2mm)),
-        compose(context(), l, stroke(bcol), linewidth(1mm)) 
-    )
+        (context(), l, stroke(col), linewidth(0.2mm)),
+        (context(), l, stroke(bcol), linewidth(1mm)))
     
     i, σ = abs(v[1]), sign(v[1])
     myline(j) = compose(context(), line([(0,(j-1)/(N-1)),(1,(j-1)/(N-1))]), stroke(cols[j]))
     myline2(j) = line([(0,(j-1)/(N-1)),(1,(j-1)/(N-1))])
     c1 = compose(context(0,0,Δt,1),
-        compose(context(), myline.([j for j=1:N if j ∉ (i, i + 1)])..., linewidth(0.2mm)), 
-        compose(context(), myline2.([j for j=1:N if j ∉ (i, i + 1)])..., stroke(bcol), linewidth(1mm)), 
-        compose(context(0,(i-1)/(N-1),1,1/(N-1)), 
-                σ == 1 ? 
-                compose(context(), f(l1, cols[i], bcol), f(l2, cols[i+1], bcol)) : 
-                compose(context(), f(l2, cols[i+1], bcol), f(l1, cols[i], bcol))))
+        (context(), myline.([j for j=1:N if j ∉ (i, i + 1)])..., linewidth(0.2mm)), 
+        (context(), myline2.([j for j=1:N if j ∉ (i, i + 1)])..., stroke(bcol), linewidth(1mm)), 
+        (context(0,(i-1)/(N-1),1,1/(N-1)), σ == 1 ? 
+                (context(), f(l1, cols[i], bcol), f(l2, cols[i+1], bcol)) : 
+                (context(), f(l2, cols[i+1], bcol), f(l1, cols[i], bcol))))
     cols[i+1], cols[i] = cols[i], cols[i+1]
     c2 = _plot((@view v[2:end]), N, cols, bcol)
     compose(c1, compose(context(Δt,0,Δt*(length(v)-1),1), c2))
