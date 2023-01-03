@@ -98,23 +98,25 @@ end
 
 function freesimplify!(a::Braid)
     e = a.els
-    isempty(e) && return a
-    i = firstindex(e)
-    j = i+1
+    length(e) <= 1 && return a
+    i, j = 1, 2
     
-    while j <= length(e)
-        if a[i] + a[j] == 0
-            a[i] = a[j] = 0
-            i > 1 && (i -= 1)
+    #multiplies e[1:i] by e[j:end] and adjust i,j
+    while j ≤ length(e)
+        if i > 0 && e[i] + e[j] == 0
+            i -= 1
         else
-            i = j
+            i += 1
+            e[i] = e[j]
         end
         j += 1
     end
+    resize!(e, i)
+    return a
 end
 
 
-function inpowers(a::Braid)
+function powers(a::Braid)
     w = Tuple{Int,Int}[]
     for x in a.els
         i, σ = abs(x), sign(x)
@@ -133,8 +135,8 @@ end
 
 function Base.show(io::IO, a::Braid)
     isempty(a.els) && print(io, "ε")
-    v = get(io, :compact, false) ? inpowers(a) : [(abs(x), sign(x)) for x in a.els]
-    print(io, prod("σ"*subscripts(i).*superscripts(k) for (i,k) in v; init=""))
+    v = get(io, :compact, false) ? powers(a) : [(abs(x), sign(x)) for x in a.els]
+    print(io, prod("σ"*subscripts(i)*superscripts(k) for (i,k) in v; init=""))
 end
 
 
