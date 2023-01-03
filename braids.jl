@@ -3,16 +3,22 @@ using Colors
 
 
 struct Braid
-    els::Vector{Int} 
+    els::Vector{Int}
+    function Braid(v::AbstractVector{<:Integer})
+        @assert all(!iszero, v)
+        new(v)
+    end
 end
 
-braid(x...) = Braid(Int[x...])
+braid(x...) = Braid([x...])
 
 one(::Braid) = braid()
 
+one(::Type{Braid}) = braid()
+
 function Base.:^(a::Braid, k::Integer)
     if k < 0
-        Braid(reduce(vcat, fill(reverse(.-a.els), abs(k))))
+        Braid(reduce(vcat, fill(reverse(.-a.els), -k)))
     elseif k > 0
         Braid(reduce(vcat, fill(a.els, k)))
     else
@@ -20,7 +26,7 @@ function Base.:^(a::Braid, k::Integer)
     end 
 end
 
-Base.:*(a::Braid, b::Braid) = Braid(vcat(a.els,b.els))
+Base.:*(a::Braid, b::Braid) = Braid(vcat(a.els, b.els))
 
 Base.inv(a::Braid) = Braid(reverse(.- a.els))
 
@@ -96,6 +102,7 @@ function Base.show(io::IO, mime::MIME"text/html", a::Braid)
     show(io, mime, plot(a; N, cols, bcol))
 end
 
+"Do a free simplificaton of a, cancelling out all products of inverses"
 function freesimplify!(a::Braid)
     e = a.els
     length(e) <= 1 && return a
@@ -115,7 +122,57 @@ function freesimplify!(a::Braid)
     return a
 end
 
+function nexthandle(a::Braid)
+    for q = 2:length(a.els), p = q-1:-1:1
+        ishandle(a, p, q) && return p,q        
+    end
+    return 0,0
+end
 
+function reduceh(a::Braid, i::Int, j::Int)
+    H = Int[]
+    x,s = abs(a.els[i]), sign(a.els[i])
+    for k = i:j
+        xk, sk = abs(a.els[k]), sign(a.els[k])
+        if xk ∉ (x, x+1)
+            push!(H, xk * sk)
+        elseif xk == x + 1
+            append!(H, (-xk * s, x * sk, xk * s))
+        end
+    end
+    @views freesimplify!(Braid([1; a.els[1:i-1]; H; a.els[j+1:end]]))
+end
+
+function reduceh(a::Braid)
+    b = freesimplify!(Braid(copy(a.els)))
+    while true
+        i, j = nexthandle(b)
+        i == 0 && return b
+        b = reduceh(a, i, j)
+    end
+end
+
+"Is `i, j` a handle for `a`?"
+function ishandle(a::Braid, i::Int, j::Int)
+    a.els[i] + a.els[j] != 0 && return false
+    x = abs(a.els[i])
+    return all(a.els[k] ∉ (x, x+1, -x, -x-1) for k in i+1:j-1) 
+end
+
+"Fetch the main generator of `a`"
+main_generator(a::Braid) = minimum(abs, a.els)
+
+"Is `i,j` a main handle for `a`?"
+ismainhandle(a::Braid, i::Int, j::Int) = ishandle(a, i, j) && abs(a.els[i]) == main_generator(a)
+
+"Is `a` reduced?"
+function isreduced(a::Braid)
+    isempty(a.els) && return true
+    maingen = main_generator(a)
+    return all(!=(maingen), a.els) || all(!=(-maingen), a.els)
+end
+
+"Produce an expression of `a` in powers of generators, in the form of a Vector of tuples (generator, power)"
 function powers(a::Braid)
     w = Tuple{Int,Int}[]
     for x in a.els
