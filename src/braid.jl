@@ -14,6 +14,12 @@ Base.one(::Type{Braid}) = braid()
 
 Base.isone(a::Braid) = isempty(a.els)
 
+Base.eachindex(a::Braid) = eachindex(a.els)
+
+Base.getindex(a::Braid, i::Int) = (abs(a.els[i]), sign(a.els[i]))
+
+Base.copy(a::Braid) = Braid(copy(a.els))
+
 function Base.:^(a::Braid, k::Integer)
     if k < 0
         Braid(reduce(vcat, fill(reverse(.-a.els), -k)))
@@ -35,13 +41,13 @@ Base.length(a::Braid) = length(a.els)
 "Produce an expression of `a` in powers of generators, in the form of a Vector of tuples (generator, power)"
 function powers(a::Braid)
     w = Tuple{Int,Int}[]
-    for x in a.els
-        i, σ = abs(x), sign(x)
+    for k in eachindex(a)
+        i, σ = a[k]
         if !isempty(w) && w[end][1] == i
-            if w[end][2]+σ == 0
+            if w[end][2] + σ == 0
                 pop!(w)
             else
-                w[end] = (w[end][1],w[end][2]+σ)
+                w[end] = (w[end][1], w[end][2] + σ)
             end
         else
             push!(w, (i,σ))

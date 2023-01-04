@@ -1,20 +1,19 @@
 "Do an in-place free simplificaton of a, cancelling out all products of inverses"
 function freesimplify!(a::Braid)
-    e = a.els
-    length(e) <= 1 && return a
-    i, j = 1, 2
+    length(a) <= 1 && return a
     
-    #multiplies e[1:i] by e[j:end] and adjust i,j
-    while j ≤ length(e)
-        if i > 0 && e[i] + e[j] == 0
+    i = 1
+    for j = 2:length(a)
+        #multiplies e[1:i] by e[j:end] and adjust i,j
+        if i > 0 && a.els[i] + a.els[j] == 0
             i -= 1
         else
             i += 1
-            e[i] = e[j]
+            a.els[i] = a.els[j]
         end
         j += 1
     end
-    resize!(e, i)
+    resize!(a.els, i)
     return a
 end
 
@@ -25,11 +24,9 @@ function ishandle(a::Braid, i::Int, j::Int)
     return all(abs(a.els[k]) ∉ (x-1, x) for k in i+1:j-1) 
 end
 
-"""
-Find next permitted handle of `a`, return `0,0`` if `a` is already reduced 
-"""
+"Find next *permitted* handle of `a`, return `0,0`` if `a` is already reduced"
 function nexthandle(a::Braid)
-    for j = 2:length(a.els)
+    for j = 2:length(a)
         for i = j-1:-1:1
             ishandle(a, i, j) && return i,j       
         end
@@ -37,15 +34,13 @@ function nexthandle(a::Braid)
     return 0,0
 end
 
-"""
-One H-step of Dehornoy reduction of `a` on handle `i,j`
-"""
+"One H-step of Dehornoy reduction of `a` on handle `i,j`"
 function reduced(a::Braid, i::Int, j::Int)
-    xi,si = abs(a.els[i]), sign(a.els[i])
-    @assert (xi,si) == (abs(a.els[j]),-sign(a.els[j]))
+    (xi,si), (xj,sj) = a[i], a[j]
+    @assert (xi,si) == (xj,-sj)
     H = a.els[1:i-1]
     for k = i+1:j-1
-        xk, sk = abs(a.els[k]), sign(a.els[k])
+        xk, sk = a[k]
         @assert xk != xi
         if xk != xi+1
             push!(H, xk * sk)
@@ -55,20 +50,18 @@ function reduced(a::Braid, i::Int, j::Int)
             push!(H, xk * si)
         end
     end
-    append!(H, @view a.els[j+1:end])
+    @views append!(H, a.els[j+1:end])
     freesimplify!(Braid(H))
 end
 
-"""
-Dehornoy reduction of `a`
-"""
+
+"Dehornoy reduction of `a`"
 function reduced(a::Braid)
-    a = freesimplify!(Braid(copy(a.els)))
-    while true
-        i, j = nexthandle(a)
-        i == 0 && return a
+    a = freesimplify!(copy(a))
+    while ((i, j) = nexthandle(a)) != (0, 0)
         a = reduced(a, i, j)
     end
+    a
 end
 
 "Fetch the main generator of `a`"
@@ -84,4 +77,5 @@ function isreduced(a::Braid)
     return all(!=(maingen), a.els) || all(!=(-maingen), a.els)
 end
 
+"Braid equivalence, are `a` and `b` the same group element?"
 Base.:(==)(a::Braid, b::Braid) = isone(reduced(a*b^-1))
