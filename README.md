@@ -25,7 +25,7 @@ It is similar in scope to `https://github.com/jwvictor/Braids.jl`. At difference
 julia> b = prod(braid(rand(1:5))^rand(-2:2) for i=1:40)
 ```
 
-displays in `MIME"text/html"` as:
+displays in `MIME"text/html"` (e.g. in a notebook) as:
 
 ![Example Braid](braid.png)
 
@@ -35,6 +35,7 @@ and in `MIME"text/plain"` as:
 σ₂⁻²σ₅⁻²σ₄²σ₅⁻¹σ₂⁻²σ₁⁵σ₄σ₂⁻²σ₃⁻⁴σ₂⁻²σ₅σ₁⁻¹σ₃²σ₄²σ₃⁻⁵σ₁⁻²σ₄²σ₁⁻²σ₂⁻²
 ```
 
+Note that in notebooks you can choose the display `MIME` type. 
 It can be reduced to the unique simplified equivalent braid
 
 ```julia
