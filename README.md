@@ -1,6 +1,6 @@
 # BraidGroup
 
-[![Build Status](https://github.com/abraunst/BraidGroup.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/abraunst/BraidGroup.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![Build Status](https://github.com/abraunst/BraidGroup.jl/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/abraunst/BraidGroup.jl/actions/workflows/ci.yml?query=branch%3Amain)
 
 This small package implements Artin's $B_\infty$ Braid group and some tools.
 
