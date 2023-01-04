@@ -44,4 +44,3 @@ julia> reduced(b)
 ![Reduced Braid](reducedbraid.png)
 
 
-
