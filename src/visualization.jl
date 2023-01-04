@@ -1,7 +1,7 @@
 using Compose, Colors
 
 
-function plot(a::Braid; N=width(a), cols=StepRangeLen(0,360/N,N), bcol="black")
+function plot(a::Braid; N=width(a), cols=HSV.(StepRangeLen(0,360/N,N),1,1), bcol="black")
     cols = copy(cols)
     Δt = 3mm
     set_default_graphic_size(Δt * (length(a) + 1), N*2mm)
