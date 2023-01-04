@@ -122,41 +122,49 @@ function freesimplify!(a::Braid)
     return a
 end
 
-function nexthandle(a::Braid)
-    for q = 2:length(a.els), p = q-1:-1:1
-        ishandle(a, p, q) && return p,q        
-    end
-    return 0,0
-end
-
-function reduceh(a::Braid, i::Int, j::Int)
-    H = Int[]
-    x,s = abs(a.els[i]), sign(a.els[i])
-    for k = i:j
-        xk, sk = abs(a.els[k]), sign(a.els[k])
-        if xk ∉ (x, x+1)
-            push!(H, xk * sk)
-        elseif xk == x + 1
-            append!(H, (-xk * s, x * sk, xk * s))
-        end
-    end
-    @views freesimplify!(Braid([1; a.els[1:i-1]; H; a.els[j+1:end]]))
-end
-
-function reduceh(a::Braid)
-    b = freesimplify!(Braid(copy(a.els)))
-    while true
-        i, j = nexthandle(b)
-        i == 0 && return b
-        b = reduceh(a, i, j)
-    end
-end
-
 "Is `i, j` a handle for `a`?"
 function ishandle(a::Braid, i::Int, j::Int)
     a.els[i] + a.els[j] != 0 && return false
     x = abs(a.els[i])
-    return all(a.els[k] ∉ (x, x+1, -x, -x-1) for k in i+1:j-1) 
+    return all(abs(a.els[k]) ∉ (x-1, x) for k in i+1:j-1) 
+end
+
+
+function nexthandle(a::Braid)
+    for j = 2:length(a.els)
+        for i = j-1:-1:1
+            ishandle(a, i, j) && return i,j       
+        end
+    end
+    return 0,0
+end
+
+function reduced(a::Braid, i::Int, j::Int)
+    xi,si = abs(a.els[i]), sign(a.els[i])
+    @assert (xi,si) == (abs(a.els[j]),-sign(a.els[j]))
+    H = a.els[1:i-1]
+    for k = i+1:j-1
+        xk, sk = abs(a.els[k]), sign(a.els[k])
+        @assert xk != xi
+        if xk != xi+1
+            push!(H, xk * sk)
+        else
+            push!(H, -xk * si)
+            push!(H, xi * sk)
+            push!(H, xk * si)
+        end
+    end
+    append!(H, @view a.els[j+1:end])
+    freesimplify!(Braid(H))
+end
+
+function reduced(a::Braid)
+    a = freesimplify!(Braid(copy(a.els)))
+    while true
+        i, j = nexthandle(a)
+        i == 0 && return a
+        a = reduced(a, i, j)
+    end
 end
 
 "Fetch the main generator of `a`"
