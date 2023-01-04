@@ -2,7 +2,7 @@ module BraidGroup
 
 export Braid, braid, reduced, freesimiplify!, width
 
-include("braids.jl")
+include("braid.jl")
 include("reduction.jl")
 include("visualization.jl")
 

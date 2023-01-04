@@ -6,7 +6,7 @@ struct Braid
     end
 end
 
-braid(x...) = Braid([x...])
+braid(x...) = Braid(Int[x...])
 
 Base.one(::Braid) = braid()
 
