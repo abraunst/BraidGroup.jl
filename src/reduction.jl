@@ -49,7 +49,7 @@ function nexthandle(a::Braid, last = fill(0, width(a)))
 end
 
 "One H-step of Dehornoy reduction of `a` on handle `i,j`"
-function reduced(a::Braid, i::Int, j::Int)
+function reduced_slow(a::Braid, i::Int, j::Int)
     (xi,si), (xj,sj) = a[i], a[j]
     @assert (xi,si) == (xj,-sj)
     H = a.els[1:i-1]
@@ -68,16 +68,59 @@ function reduced(a::Braid, i::Int, j::Int)
     freesimplify!(Braid(H))
 end
 
+"in-place Dehornoy H-step"
+function reduced!(a::Braid, i::Int, j::Int)
+    (xi,si), (xj,sj) = a[i], a[j]
+    @assert (xi,si) == (xj,-sj)
+    numk = count(x->abs(x) == xi + 1, @view a.els[i+1:j-1])
+    oldlen = length(a)
+    newlen = oldlen + 2numk - 2
+    rnew = (i+1:j-1) .+ (2numk - 1)
+    if newlen >= oldlen 
+        resize!(a.els, newlen)
+        a.els[(j+1:oldlen) .+ (2numk - 2)] = @view a.els[j+1:oldlen]
+        a.els[rnew] = @view a.els[i+1:j-1]
+    else
+        a.els[rnew] = @view a.els[i+1:j-1]
+        a.els[(j+1:oldlen) .+ (2numk - 2)] = @view a.els[j+1:oldlen]
+        resize!(a.els, newlen)
+    end
+    pos = i
+    for k in rnew
+        xk, sk = a[k]
+        @assert xk != xi
+        if xk != xi + 1
+            a.els[pos] =  xk * sk; pos += 1
+        else
+            a.els[pos] =  xk * sj; pos += 1
+            a.els[pos] =  xi * sk; pos += 1
+            a.els[pos] =  xk * si; pos += 1
+        end
+    end
+    freesimplify!(a)
+end
+
 
 "Dehornoy reduction of `a`"
-function reduced(a::Braid)
+function reduced!(a::Braid)
     last = fill(0, width(a))
-    a = freesimplify!(copy(a))
+    freesimplify!(a)
     while ((i, j) = nexthandle(a, last)) != (0, 0)
-        a = reduced(a, i, j)
+        reduced!(a, i, j)
     end
     a
 end
+
+function reduced_slow(a::Braid)
+    last = fill(0, width(a))
+    a = freesimplify!(copy(a))
+    while ((i, j) = nexthandle(a, last)) != (0, 0)
+        a = reduced_slow(a, i, j)
+    end
+    a
+end
+
+reduced(a::Braid) = reduced!(copy(a))
 
 "Fetch the main generator of `a`"
 main_generator(a::Braid) = minimum(abs, a.els)
