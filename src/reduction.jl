@@ -4,14 +4,13 @@ function freesimplify!(a::Braid)
     
     i = 1
     for j = 2:length(a)
-        #multiplies e[1:i] by e[j:end] and adjust i,j
+        #multiplies a[1:i] by a[j:end] and adjust i,j
         if i > 0 && a.els[i] + a.els[j] == 0
             i -= 1
         else
             i += 1
             a.els[i] = a.els[j]
         end
-        j += 1
     end
     resize!(a.els, i)
     return a
@@ -24,12 +23,27 @@ function ishandle(a::Braid, i::Int, j::Int)
     return all(abs(a.els[k]) ∉ (x-1, x) for k in i+1:j-1) 
 end
 
-"Find next *permitted* handle of `a`, return `0,0`` if `a` is already reduced"
-function nexthandle(a::Braid)
+function nexthandle_slow(a::Braid)
     for j = 2:length(a)
         for i = j-1:-1:1
             ishandle(a, i, j) && return i,j       
         end
+    end
+    return 0,0
+end
+
+
+"Find next *permitted* handle of `a`, return `0,0`` if `a` is already reduced"
+function nexthandle(a::Braid, last = fill(0, width(a)))
+    length(a) < 2 && return 0,0
+    last .= 0
+    for j = 1:length(a)
+        xj,sj = a[j]
+        i = last[xj] # i is a candidate
+        if i >= 1 && sj != sign(a.els[i]) && (xj == 1 || last[xj - 1] < i)
+            return i,j
+        end
+        last[xj] = j
     end
     return 0,0
 end
@@ -42,10 +56,10 @@ function reduced(a::Braid, i::Int, j::Int)
     for k = i+1:j-1
         xk, sk = a[k]
         @assert xk != xi
-        if xk != xi+1
+        if xk != xi + 1
             push!(H, xk * sk)
         else
-            push!(H, -xk * si)
+            push!(H,-xk * si)
             push!(H, xi * sk)
             push!(H, xk * si)
         end
@@ -57,8 +71,9 @@ end
 
 "Dehornoy reduction of `a`"
 function reduced(a::Braid)
+    last = fill(0, width(a))
     a = freesimplify!(copy(a))
-    while ((i, j) = nexthandle(a)) != (0, 0)
+    while ((i, j) = nexthandle(a, last)) != (0, 0)
         a = reduced(a, i, j)
     end
     a

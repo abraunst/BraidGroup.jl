@@ -14,6 +14,8 @@ end
 
 
 @testset "Reduction and equality" begin
+    # check Artin's rules
     @test all(braid(i, i+1, i) == braid(i + 1, i, i + 1) for i = 1:20)
+    @test all(braid(i, i+2) == braid(i + 2, i) for i = 1:20)
     @test b*b^-1 == one(Braid)
 end
