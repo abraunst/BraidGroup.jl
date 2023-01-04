@@ -68,7 +68,7 @@ function reduced_slow(a::Braid, i::Int, j::Int)
     freesimplify!(Braid(H))
 end
 
-"in-place Dehornoy H-step"
+"In-place Dehornoy H-step"
 function reduced!(a::Braid, i::Int, j::Int)
     (xi,si), (xj,sj) = a[i], a[j]
     @assert (xi,si) == (xj,-sj)
@@ -76,27 +76,28 @@ function reduced!(a::Braid, i::Int, j::Int)
     oldlen = length(a)
     newlen = oldlen + 2numk - 2
     rnew = (i+1:j-1) .+ (2numk - 1)
-    if newlen >= oldlen 
+    if numk > 0
         resize!(a.els, newlen)
         a.els[(j+1:oldlen) .+ (2numk - 2)] = @view a.els[j+1:oldlen]
         a.els[rnew] = @view a.els[i+1:j-1]
-    else
-        a.els[rnew] = @view a.els[i+1:j-1]
-        a.els[(j+1:oldlen) .+ (2numk - 2)] = @view a.els[j+1:oldlen]
-        resize!(a.els, newlen)
-    end
-    pos = i
-    for k in rnew
-        xk, sk = a[k]
-        @assert xk != xi
-        if xk != xi + 1
-            a.els[pos] =  xk * sk; pos += 1
-        else
-            a.els[pos] =  xk * sj; pos += 1
-            a.els[pos] =  xi * sk; pos += 1
-            a.els[pos] =  xk * si; pos += 1
+        pos = i
+        for k in rnew
+            xk, sk = a[k]
+            @assert xk != xi
+            if xk != xi + 1
+                a.els[pos] =  xk * sk; pos += 1
+            else
+                a.els[pos] =  xk * sj; pos += 1
+                a.els[pos] =  xi * sk; pos += 1
+                a.els[pos] =  xk * si; pos += 1
+            end
         end
+    else # numk == 0, just remove i and j
+        a.els[rnew] = @view a.els[i+1:j-1]
+        a.els[(j+1:oldlen) .+ (2numk - 2)] = @view a.els[j+1:oldlen]
+        resize!(a.els, newlen)
     end
+
     freesimplify!(a)
 end
 
