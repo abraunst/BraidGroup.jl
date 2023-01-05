@@ -1,10 +1,12 @@
-struct Braid
-    els::Vector{Int}
-    function Braid(v::Vector{Int})
+struct Braid{V<:AbstractVector{Int}}
+    els::V
+    function Braid(v::V) where V<:AbstractVector{Int}
         @assert all(!iszero, v)
-        new(v)
+        new{V}(v)
     end
 end
+
+Braid(v) = Braid(collect(v))
 
 braid(x...) = Braid(Int[x...])
 
@@ -18,7 +20,7 @@ Base.eachindex(a::Braid) = eachindex(a.els)
 
 Base.getindex(a::Braid, i::Int) = (abs(a.els[i]), sign(a.els[i]))
 
-Base.copy(a::Braid) = Braid(copy(a.els))
+Base.copy(a::Braid) = Braid(collect(a.els))
 
 function Base.:^(a::Braid, k::Integer)
     if k < 0
@@ -31,6 +33,10 @@ function Base.:^(a::Braid, k::Integer)
 end
 
 Base.:*(a::Braid, b::Braid) = Braid(vcat(a.els, b.els))
+
+Base.:/(a::Braid, b::Braid) = Braid(vcat(a.els, reverse(.- b.els)))
+
+Base.:\(a::Braid, b::Braid) = Braid(vcat(reverse(.- a.els), b.els))
 
 Base.inv(a::Braid) = Braid(reverse(.- a.els))
 
