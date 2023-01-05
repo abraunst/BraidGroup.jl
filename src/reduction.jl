@@ -101,9 +101,8 @@ function reduced!(a::Braid)
 end
 
 function reduced_slow(a::Braid)
-    last = fill(0, width(a))
     a = freesimplify!(copy(a))
-    while ((i, j) = nexthandle(a, last)) != (0, 0)
+    while ((i, j) = nexthandle_slow(a)) != (0, 0)
         a = reduced_slow(a, i, j)
     end
     a
