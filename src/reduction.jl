@@ -73,31 +73,19 @@ function reduced!(a::Braid, i::Int, j::Int)
     (xi,si), (xj,sj) = a[i], a[j]
     @assert (xi,si) == (xj,-sj)
     numk = count(x->abs(x) == xi + 1, @view a.els[i+1:j-1])
-    oldlen = length(a)
-    newlen = oldlen + 2numk - 2
-    rnew = (i+1:j-1) .+ (2numk - 1)
+    oldb1, oldb2 = i+1:j-1, j+1:length(a)
+    newb1, newb2, newb = oldb1 .+ (2numk - 1), oldb2 .+ (2numk - 2), i:j+2numk-2
     if numk > 0
-        resize!(a.els, newlen)
-        a.els[(j+1:oldlen) .+ (2numk - 2)] = @view a.els[j+1:oldlen]
-        a.els[rnew] = @view a.els[i+1:j-1]
-        pos = i
-        for k in rnew
-            xk, sk = a[k]
-            @assert xk != xi
-            if xk != xi + 1
-                a.els[pos] =  xk * sk; pos += 1
-            else
-                a.els[pos] =  xk * sj; pos += 1
-                a.els[pos] =  xi * sk; pos += 1
-                a.els[pos] =  xk * si; pos += 1
-            end
-        end
+        resize!(a.els, length(a) + 2numk - 2)
+        a.els[newb2] = @view a.els[oldb2]
+        a.els[newb1] = @view a.els[oldb1]
+        replace((xk, sk)) = xk == xi + 1 ? (xk*sj, xi*sk, xk*si) : xk*sk
+        a.els[newb] .= Iterators.flatten(replace(a[k]) for k in newb1)
     else # numk == 0, just remove i and j
-        a.els[rnew] = @view a.els[i+1:j-1]
-        a.els[(j+1:oldlen) .+ (2numk - 2)] = @view a.els[j+1:oldlen]
-        resize!(a.els, newlen)
+        a.els[newb1] = @view a.els[oldb1]
+        a.els[newb2] = @view a.els[oldb2]
+        resize!(a.els, length(a) - 2)
     end
-
     freesimplify!(a)
 end
 
