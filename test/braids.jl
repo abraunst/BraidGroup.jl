@@ -1,3 +1,5 @@
+using BlockArrays
+
 # fixed braids
 vori = Braid[Braid([-1, 15, 4, -2]), Braid([-1, -5, 10]), Braid([3, -12, -3, -5, 9, -6, -6, -3, -8, -3, -5, -6]), Braid([-6, 8, 4, -6, 10, 10, 4, 6, -10, 4, -12, -12, -6, 3, 10, 12, -6, -8, 2]), Braid([-3, -15, -5, -12, 15, -15, -12, 6, 4, -4, 8, 8]), Braid([2, 1, -2]), Braid([-5, 9, -9, 4, -4, -10, -2, 5, -2, -3, -4, -1, 9, -1, 4, 4, 2, 3]), Braid([-15, 2, -2, 9, -3, 12, 1, -4, 2, 9, 10]), Braid([-15, 3, 5, -10, -9, 4]), Braid([-9, -2, -12, -4, 6, 3, 12, 10, -6, -3, 6])]
 vred = Braid[Braid([-1, 15, 4, -2]), Braid([-1, -5, 10]), Braid([-12, -5, 9, -6, -6, -3, -8, -3, -5, -6]), Braid([-6, 4, 10, 4, 4, -12, -6, 3, 10, -6, 2]), Braid([-3, -15, -5, -12, -12, 6, 8, 8]), Braid([2, 1, -2]), Braid([-10, -2, -2, -3, -1, 9, -1, 4, 2, 3]), Braid([-15, 9, -3, 12, 1, -4, 2, 9, 10]), Braid([-15, 3, 5, -10, -9, 4]), Braid([-9, -2, -4, 10, 6])]
@@ -33,5 +35,13 @@ end
 @testset "Comparison and sorting" begin
     for (a,b) in zip(sort(vori), sort(vred))
         @test reduced(a).els == BraidGroup.reduced_slow(a).els == b.els
+    end
+end
+
+@testset "Garside" begin
+    gar(n) = Braid(mortar([1:i for i=n-1:-1:1]))
+    for b in vori
+        n = width(b)
+        @test gar(n)\b*gar(n) == Braid((n .- abs.(b.els)) .* sign.(b.els))
     end
 end
