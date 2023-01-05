@@ -124,10 +124,10 @@ end
 reduced(a::Braid) = reduced!(copy(a))
 
 "Fetch the main generator of `a`"
-main_generator(a::Braid) = minimum(abs, a.els)
+main_generator(a::Braid) = isone(a) ? 0 : argmin(abs, a.els)
 
 "Is `i,j` a main handle for `a`?"
-ismainhandle(a::Braid, i::Int, j::Int) = ishandle(a, i, j) && abs(a.els[i]) == main_generator(a)
+ismainhandle(a::Braid, i::Int, j::Int) = ishandle(a, i, j) && abs(a.els[i]) == abs(main_generator(a))
 
 "Is `a` reduced?"
 function isreduced(a::Braid)
@@ -137,4 +137,9 @@ function isreduced(a::Braid)
 end
 
 "Braid equivalence, are `a` and `b` the same group element?"
-Base.:(==)(a::Braid, b::Braid) = isone(reduced(a*b^-1))
+Base.:(==)(a::Braid, b::Braid) = isone(reduced!(inv(a)*b))
+
+"Braid comparison"
+Base.:(<)(a::Braid, b::Braid) = main_generator(reduced!(inv(a)*b)) > 0
+
+Base.isless(a::Braid, b::Braid) = a < b
