@@ -4,8 +4,7 @@ vred = Braid[Braid([-1, 15, 4, -2]), Braid([-1, -5, 10]), Braid([-12, -5, 9, -6,
 
 @testset "Basic operations" begin
     for b in vori
-        x = b.els
-        @test Braid(x).els == braid(x...).els == prod(braid(i) for i in x).els
+        @test Braid(b.els).els == braid(b.els...).els == prod(braid.(b.els)).els
         @test length(inv(b)) == length(b)
         @test width(inv(b)) == width(b)
         @test length(b^4) == 4*length(b)
@@ -16,8 +15,9 @@ end
 
 @testset "Reduction and equality" begin
     # check Artin's rules
-    @test all(braid(i, i+1, i) == braid(i + 1, i, i + 1) for i = 1:20)
-    @test all(braid(i, i+2) == braid(i + 2, i) for i = 1:20)
+    @test all(braid(i, i + 1, i) == braid(i + 1, i, i + 1) for i = 1:20)
+    @test all(braid(i, i + k) == braid(i + k, i) for i = 1:20, k=2:5)
+
     # check fast reduction against slow
     for i=1:30
         b = Braid(rand(vcat(-5:-1, 1:5), rand((1,2,3,10,20))))
