@@ -5,23 +5,20 @@ function composed(a::Braid; compressed=true, Δt = 3mm, Δy = 2mm, cols=nothing,
     T,N = length(a), width(a)
     cols = isnothing(cols) ? HSV.(StepRangeLen(0,360/N,N),1,1) : copy(cols)
     set_default_graphic_size(Δt * max(T, 1), Δy * N)
-    
-    cline(l, col) = compose(context(), 
-        (context(), l, stroke(col), linewidth(0.2mm)),
-        (context(), l, stroke(bcol), linewidth(1mm)))
 
-    pos(j) = (j-0.5)/N
+    # dropped shadow
+    shadow(l, col) = compose(context(), 
+        (context(), l, stroke(col), linewidth(Δy/10)),
+        (context(), l, stroke(bcol), linewidth(Δy/2)))
 
-    function crossing(x, s, n)
-        con = context(Δt*n, pos(x), Δt, 1/N)
-        c1 = cline(curve((0,0), (0.5,0), (0.5,1),(1,1)), cols[x])
-        c2 = cline(curve((0,1), (0.5,1), (0.5,0),(1,0)), cols[x+1])
+    function crossing(x, s, t)
+        con = context(Δt*t, (x-0.5)/N, Δt, 1/N)
+        c1 = shadow(curve((0,0), (0.5,0), (0.5,1), (1,1)), cols[x])
+        c2 = shadow(curve((0,1), (0.5,1), (0.5,0), (1,0)), cols[x+1])
         s == 1 ? compose(con, c1, c2) : compose(con, c2, c1)
     end
 
-    hline(x, n1, n2) = compose(context(), 
-        (context(), line([(Δt*n1,pos(x)), (Δt*n2,pos(x))]), stroke(cols[x]), linewidth(0.2mm)),
-        (context(), line([(Δt*n1,pos(x)), (Δt*n2,pos(x))]), stroke(bcol), linewidth(1mm)))
+    hline(x, t1, t2) = shadow(line([(Δt*t1,(x-0.5)/N), (Δt*t2,(x-0.5)/N)]), cols[x]) 
 
     c = context()
 
