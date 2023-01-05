@@ -11,10 +11,10 @@ In particular, it implements
 * [Dehornoy](https://www.lmno.cnrs.fr/archives/dehornoy/Papers/Dfo.pdf) reduction `reduced`, allowing to implement Braid equivalence `==`.
 * Nice `Braid` visualizations using `Compose`
 
-It is similar in scope to [Braids.jl](https://github.com/jwvictor/Braids.jl) from which it draws some inspiration. At difference with it:
+It is similar in scope to [Braids.jl](https://github.com/jwvictor/Braids.jl) from which it draws some inspiration. At difference with it, this package:
 
 * Represents the $B_\infty$ group rather than $B_n$
-* Internally, this package represent braids as product of generators, whereas `Braids` stores powers of generators.
+* Internally represent braids as product of generators, whereas `Braids` stores powers of generators.
 * Implements both `MIME"text/html"` and `MIME"text/plain"` output
 * Operations are done in-place as much as possible: in particular, `reduced!` is almost non-allocating, and each H iteration is linear in the length of the braid.
 * On the negative side, the interesting matrix representation included in `Braids.jl` is not implemented.
@@ -35,7 +35,7 @@ and in `MIME"text/plain"` as:
 σ₂⁻²σ₅⁻²σ₄²σ₅⁻¹σ₂⁻²σ₁⁵σ₄σ₂⁻²σ₃⁻⁴σ₂⁻²σ₅σ₁⁻¹σ₃²σ₄²σ₃⁻⁵σ₁⁻²σ₄²σ₁⁻²σ₂⁻²
 ```
 
-Note that in notebooks you can choose the display `MIME` type. 
+Note that in notebooks you can choose which `MIME` type to display. 
 It can be reduced to the unique simplified equivalent braid
 
 ```julia
