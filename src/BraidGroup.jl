@@ -1,6 +1,6 @@
 module BraidGroup
 
-export Braid, braid, reduced, reduced!, freesimiplify!, width
+export Braid, braid, reduced, reduced!, freesimiplify!, width, composed
 
 include("braid.jl")
 include("reduction.jl")

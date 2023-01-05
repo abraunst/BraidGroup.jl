@@ -62,9 +62,10 @@ function Base.show(io::IO, a::Braid)
         return
     end
     if get(io, :compact, false)
-        print(io, powers(a))
+        print(io, prod("σ"*subscripts(i)*superscripts(k) for (i,k) in powers(a); init=""))
+        return
     end 
-    print(io, prod("σ"*subscripts(i)*superscripts(k) for (i,k) in powers(a); init=""))
+    print(io, "Braid(", a.els, ")")
 end
 
 superscripts(x) = x == 1 ? "" : replace(string(x), (a=>b for (a,b) in zip("-01234567890","⁻⁰¹²³⁴⁵⁶⁷⁸⁹"))...)

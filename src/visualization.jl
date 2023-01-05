@@ -1,32 +1,31 @@
 using Compose, Colors
 
 
-function plot(a::Braid; compressed=false, Δt = 3mm, N=width(a), cols=HSV.(StepRangeLen(0,360/N,N),1,1), bcol="black")
-    cols = copy(cols)
-    
-    set_default_graphic_size(Δt * (length(a) + 1), N*2mm)
+function composed(a::Braid; compressed=true, Δt = 3mm, Δy = 2mm, cols=nothing, bcol="black")
+    T,N = length(a), width(a)
+    cols = isnothing(cols) ? HSV.(StepRangeLen(0,360/N,N),1,1) : copy(cols)
+    set_default_graphic_size(Δt * max(T, 1), Δy * N)
 
     l1 = curve((0,0), (0.5,0), (0.5,1),(1,1))
     l2 = curve((0,1), (0.5,1), (0.5,0),(1,0))
     
-    f(l; col="white", bcol="black") = compose(context(), 
+    f(l, col) = compose(context(), 
         (context(), l, stroke(col), linewidth(0.2mm)),
         (context(), l, stroke(bcol), linewidth(1mm)))
 
-    pos(j) = N == 1 ? 0.0 : (j-1)/(N-1)
+    pos(j) = (j-0.5)/N
 
-    crossing(x, s, n) = compose(context(Δt*n, pos(x), Δt, 1/(N-1)), 
+    crossing(x, s, n) = compose(context(Δt*n, pos(x), Δt, 1/N), 
             s == 1 ? 
-            (context(), f(l1; col=cols[x]), f(l2; col=cols[x+1], bcol)) : 
-            (context(), f(l2; col=cols[x+1]), f(l1; col=cols[x], bcol)))
+            (context(), f(l1, cols[x]), f(l2, cols[x+1])) : 
+            (context(), f(l2, cols[x+1]), f(l1, cols[x])))
 
     hline(x, n1, n2) = compose(context(), 
         (context(), line([(Δt*n1,pos(x)), (Δt*n2,pos(x))]), stroke(cols[x]), linewidth(0.2mm)),
         (context(), line([(Δt*n1,pos(x)), (Δt*n2,pos(x))]), stroke(bcol), linewidth(1mm)))
 
-    c = compose(context(0,0.1,1,0.8))
+    c = compose(context(0,0,1,1))
 
-    T = length(a)
     T == 0 && return compose(c, hline(1, 0, 1))
     
     lastx = fill(0, N)
@@ -45,12 +44,6 @@ function plot(a::Braid; compressed=false, Δt = 3mm, N=width(a), cols=HSV.(StepR
     return c
 end
 
-
-
 function Base.show(io::IO, mime::MIME"text/html", a::Braid)
-    N = width(a)
-    cols = get(io, :cols, HSV.(StepRangeLen(0,360/N,N),1,1))
-    bcol = get(io, :bcol, "black")
-    compressed = get(io, :compressed, false)
-    show(io, mime, plot(a; N, cols, bcol, compressed))
+    show(io, mime, composed(a, compressed=false))
 end
