@@ -38,8 +38,15 @@ end
     end
 end
 
+gar(n) = Braid(mortar([1:i for i=n-1:-1:1]))
+
+@testset "Exotic containers" begin
+    for i=5:10
+        gar(n).els == Braid(gar(n).els |> collect).els
+    end
+end
+
 @testset "Garside" begin
-    gar(n) = Braid(mortar([1:i for i=n-1:-1:1]))
     for b in vori
         n = width(b)
         @test gar(n)\b*gar(n) == garside_conjugate(b)
