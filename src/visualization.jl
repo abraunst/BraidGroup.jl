@@ -62,10 +62,24 @@ function powers(a::Braid)
     w
 end
 
+superscripts(x) = x == 1 ? "" : replace(string(x), (a=>b for (a,b) in zip("-01234567890","⁻⁰¹²³⁴⁵⁶⁷⁸⁹"))...)
+
+subscripts(x) = replace(string(x), (a=>b for (a,b) in zip("-01234567890","₋₀₁₂₃₄₅₆₇₈₉"))...)
+
 function Base.show(io::IO, ::MIME"text/plain", a::Braid)
     p = powers(a)
     foreach(p) do (i,k)
-        print(io, "σ"*subscripts(i)*superscripts(k))
+        print(io, "σ", subscripts(i), superscripts(k))
     end
     isempty(p) && print(io, "ε")
+end
+
+function Base.show(io::IO, ::MIME"text/latex", a::Braid)
+    p = powers(a)
+    print(io, "\$")
+    foreach(p) do (i,k)
+        print(io, k == 1 ? "\\sigma_{$i}" : "\\sigma_{$i}^{$k}")
+    end
+    isempty(p) && print(io, "\\varepsilon")
+    print(io, "\$")
 end
