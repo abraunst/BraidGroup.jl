@@ -53,3 +53,9 @@ end
         @test gar(n)\b*gar(n) == garside_conjugate(b)
     end
 end
+
+@testset "Permutation" begin
+    for b in vori
+        @test permutation(inv(b)) == invperm(permutation(b))
+    end
+end

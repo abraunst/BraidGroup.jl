@@ -52,7 +52,7 @@ function reduced!(a::Braid, i::Int, j::Int)
     freesimplify!(a)
 end
 
-"Dehornoy reduction of `a`"
+"In-place Dehornoy reduction of `a`"
 function reduced!(a::Braid)
     last = fill(0, width(a))
     freesimplify!(a)
@@ -62,10 +62,12 @@ function reduced!(a::Braid)
     a
 end
 
+"Dehornoy reduction of `a`"
 reduced(a::Braid) = reduced!(copy(a))
 
-function permutation(a::Braid)
-    perm = collect(1:width(a))
+"Permutation of strands of `a` between the two ends of the braid"
+function permutation(a::Braid, n = width(a))
+    perm = collect(1:n)
     for i in eachindex(a)
         x = abs(a.els[i])
         perm[x],perm[x+1] = perm[x+1],perm[x]
@@ -75,18 +77,36 @@ end
 
 "Braid group equivalence, i.e. true if `a` and `b` represent the same group element"
 function Base.:(==)(a::Braid, b::Braid)
-    all(xa == xb for (xa, xb) in zip(permutation(a), permutation(b))) && 
-        isempty(reduced!(a\b))
+    n = max(width(a), width(b))
+    permutation(a,n) == permutation(b,n) && isempty(reduced!(a\b))
 end
 
 "Fetch the main generator of `a`"
 main_generator(a::Braid) = isempty(a) ? 0 : argmin(abs, a.els)
 
-"Braid comparison"
 Base.:(<)(a::Braid, b::Braid) = main_generator(reduced!(inv(a)*b)) > 0
 
 Base.isless(a::Braid, b::Braid) = a < b
 
+"""
+Conjugation with the garside element Δ, equivalent to rotating the braid 
+180 degrees around an horizontal axis.
+"""
+garside_conjugate!(a::Braid) = (a.els .= (width(a) .- abs.(a.els)) .* sign.(a.els); a)
+
+garside_conjugate(a::Braid) = garside_conjugate!(copy(a))
+
+function compress(a::Braid)
+    a = reduced(a);
+    b = reduced!(garside_conjugate(a))
+    pass = 1
+    while length(b) < length(a)
+        a, b = b, a
+        b = reduced!(garside_conjugate(a))
+        pass += 1
+    end
+    return isodd(pass) ? a : garside_conjugate(a)
+end
 
 ### slow reduction methods, useful for debugging
 ###
@@ -135,18 +155,5 @@ function reduced_slow(a::Braid)
     a
 end
 
-garside_conjugate!(a::Braid) = (a.els .= (width(a) .- abs.(a.els)) .* sign.(a.els); a)
+##################################
 
-garside_conjugate(a::Braid) = garside_conjugate!(copy(a))
-
-function compress(a::Braid)
-    a = reduced(a);
-    b = reduced!(garside_conjugate(a))
-    pass = 1
-    while length(b) < length(a)
-        a, b = b, a
-        b = reduced!(garside_conjugate(a))
-        pass += 1
-    end
-    return isodd(pass) ? a : garside_conjugate(a)
-end
