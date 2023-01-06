@@ -126,3 +126,15 @@ end
 garside_conjugate!(a::Braid) = (a.els .= (width(a) .- abs.(a.els)) .* sign.(a.els); a)
 
 garside_conjugate(a::Braid) = garside_conjugate!(copy(a))
+
+function compress(a::Braid)
+    a = reduced(a);
+    b = reduced!(garside_conjugate(a))
+    pass = 1
+    while length(b) < length(a)
+        a, b = b, a
+        b = reduced!(garside_conjugate(a))
+        pass += 1
+    end
+    return isodd(pass) ? a : garside_conjugate(a)
+end
