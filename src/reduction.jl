@@ -122,3 +122,7 @@ function reduced_slow(a::Braid)
     end
     a
 end
+
+garside_conjugate!(a::Braid) = (a.els .= (width(a) .- abs.(a.els)) .* sign.(a.els); a)
+
+garside_conjugate(a::Braid) = garside_conjugate!(copy(a))

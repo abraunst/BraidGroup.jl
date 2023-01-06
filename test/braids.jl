@@ -42,6 +42,6 @@ end
     gar(n) = Braid(mortar([1:i for i=n-1:-1:1]))
     for b in vori
         n = width(b)
-        @test gar(n)\b*gar(n) == Braid((n .- abs.(b.els)) .* sign.(b.els))
+        @test gar(n)\b*gar(n) == garside_conjugate(b)
     end
 end
