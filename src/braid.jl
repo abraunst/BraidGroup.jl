@@ -14,7 +14,7 @@ Base.one(::Braid) = braid()
 
 Base.one(::Type{Braid}) = braid()
 
-Base.isone(a::Braid) = isempty(a.els)
+Base.isempty(a::Braid) = isempty(a.els)
 
 Base.eachindex(a::Braid) = eachindex(a.els)
 

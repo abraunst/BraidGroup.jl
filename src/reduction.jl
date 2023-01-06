@@ -64,11 +64,23 @@ end
 
 reduced(a::Braid) = reduced!(copy(a))
 
+function permutation(a::Braid)
+    perm = collect(1:width(a))
+    for i in eachindex(a)
+        x = abs(a.els[i])
+        perm[x],perm[x+1] = perm[x+1],perm[x]
+    end
+    perm
+end
+
 "Braid group equivalence, i.e. true if `a` and `b` represent the same group element"
-Base.:(==)(a::Braid, b::Braid) = isone(reduced!(inv(a)*b))
+function Base.:(==)(a::Braid, b::Braid)
+    all(xa == xb for (xa, xb) in zip(permutation(a), permutation(b))) && 
+        isempty(reduced!(a\b))
+end
 
 "Fetch the main generator of `a`"
-main_generator(a::Braid) = isone(a) ? 0 : argmin(abs, a.els)
+main_generator(a::Braid) = isempty(a) ? 0 : argmin(abs, a.els)
 
 "Braid comparison"
 Base.:(<)(a::Braid, b::Braid) = main_generator(reduced!(inv(a)*b)) > 0
