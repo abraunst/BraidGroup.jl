@@ -31,7 +31,7 @@ displays in `MIME"text/html"` (e.g. in a notebook) as:
 
 ![Example Braid](braid.png)
 
-and in plain text (with `:compact=>true`) as:
+and in plain text as:
 
 ```julia
 σ₂⁻²σ₅⁻²σ₄²σ₅⁻¹σ₂⁻²σ₁⁵σ₄σ₂⁻²σ₃⁻⁴σ₂⁻²σ₅σ₁⁻¹σ₃²σ₄²σ₃⁻⁵σ₁⁻²σ₄²σ₁⁻²σ₂⁻²
