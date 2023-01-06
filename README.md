@@ -2,14 +2,18 @@
 
 [![Build Status](https://github.com/abraunst/BraidGroup.jl/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/abraunst/BraidGroup.jl/actions/workflows/ci.yml?query=branch%3Amain)
 
+![Compressed Braid](nicebraid.svg)
+
 This small package implements Artin's $B_\infty$ Braid group and some tools.
 
-In particular, it implements 
+In particular, it implements:
 
 * Standard group operations, including `*`, `inv`, `^` and `one`
 * Artin's free simplification `freesimplify!`
 * [Dehornoy](https://www.lmno.cnrs.fr/archives/dehornoy/Papers/Dfo.pdf) reduction `reduced`, allowing to implement Braid equivalence `==`.
 * Nice `Braid` visualizations using `Compose`
+* Braid minimization (Alg 2.2) in [Kotov et al](https://eprint.iacr.org/2018/491.pdf)
+* Compressed braid visualization, with parallel strand crossings. This is not the default, invoque with `composed(braid, compressed=true)`. This has been used to produce the braid above.
 
 It is similar in scope to [Braids.jl](https://github.com/jwvictor/Braids.jl) from which it draws some inspiration. At difference with it, this package:
 
@@ -18,8 +22,6 @@ It is similar in scope to [Braids.jl](https://github.com/jwvictor/Braids.jl) fro
 * Implements both `MIME"text/html"` and `MIME"text/plain"` output
 * Operations are done in-place as much as possible: in particular, `reduced!` is almost non-allocating, and each H iteration is linear in the length of the braid.
 * On the negative side, the interesting matrix representation included in `Braids.jl` is not implemented.
-
-
 
 ```julia
 julia> b = prod(braid(rand(1:5))^rand(-2:2) for i=1:40)
@@ -35,7 +37,7 @@ and in plain text (with `:compact=>true`) as:
 σ₂⁻²σ₅⁻²σ₄²σ₅⁻¹σ₂⁻²σ₁⁵σ₄σ₂⁻²σ₃⁻⁴σ₂⁻²σ₅σ₁⁻¹σ₃²σ₄²σ₃⁻⁵σ₁⁻²σ₄²σ₁⁻²σ₂⁻²
 ```
 
-Note that in notebooks you can choose which `MIME` type to display. 
+Note that in notebooks you can choose which `MIME` type to display.
 It can be reduced to the unique simplified equivalent braid
 
 ```julia
@@ -43,5 +45,3 @@ julia> reduced(b)
 ```
 
 ![Reduced Braid](reducedbraid.png)
-
-
