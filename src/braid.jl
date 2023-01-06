@@ -44,10 +44,6 @@ width(a::Braid) = maximum(abs, a.els; init=0) + 1
 
 Base.length(a::Braid) = length(a.els)
 
-function Base.show(io::IO, a::Braid)
-    print(io, "Braid(", a.els, ")")
-end
+Base.show(io::IO, a::Braid) = print(io, "Braid(", a.els, ")")
 
-superscripts(x) = x == 1 ? "" : replace(string(x), (a=>b for (a,b) in zip("-01234567890","⁻⁰¹²³⁴⁵⁶⁷⁸⁹"))...)
-
-subscripts(x) = replace(string(x), (a=>b for (a,b) in zip("-01234567890","₋₀₁₂₃₄₅₆₇₈₉"))...)
+randbraid(width, length) = Braid(rand(vcat(-width-1:-1, 1:width-1), length))

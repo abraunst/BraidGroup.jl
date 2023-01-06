@@ -1,6 +1,7 @@
 module BraidGroup
 
-export Braid, braid, reduced, reduced!, freesimiplify!, width, composed, garside_conjugate!, garside_conjugate
+export Braid, braid, reduced, reduced!, freesimiplify!, width, composed, 
+    garside_conjugate!, garside_conjugate, randbraid
 
 include("braid.jl")
 include("reduction.jl")
