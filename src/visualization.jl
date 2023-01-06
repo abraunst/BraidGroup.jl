@@ -43,3 +43,29 @@ end
 function Base.show(io::IO, mime::MIME"text/html", a::Braid)
     show(io, mime, composed(a, compressed=false))
 end
+
+"Produce an expression of `a` in powers of generators, in the form of a Vector of tuples (generator, power)"
+function powers(a::Braid)
+    w = Tuple{Int,Int}[]
+    for k in eachindex(a)
+        i, σ = a[k]
+        if !isempty(w) && w[end][1] == i
+            if w[end][2] + σ == 0
+                pop!(w)
+            else
+                w[end] = (w[end][1], w[end][2] + σ)
+            end
+        else
+            push!(w, (i,σ))
+        end
+    end
+    w
+end
+
+function Base.show(io::IO, ::MIME"text/plain", a::Braid)
+    p = powers(a)
+    foreach(p) do (i,k)
+        print(io, "σ"*subscripts(i)*superscripts(k))
+    end
+    isempty(p) && print(io, "ε")
+end
