@@ -65,7 +65,7 @@ superscripts(x) = x == 1 ? "" : replace(string(x), (a=>b for (a,b) in zip("-0123
 subscripts(x) = replace(string(x), (a=>b for (a,b) in zip("-01234567890","₋₀₁₂₃₄₅₆₇₈₉"))...)
 
 function Base.show(io::IO, ::MIME"text/plain", a::Braid)
-    print(io, "Braid with $(width(a)) brands of length $(length(a)):")
+    println(io, "Braid with $(width(a)) brands of length $(length(a)):")
     p = powers(a)
     foreach(p) do (i,k)
         print(io, "σ", subscripts(i), superscripts(k))
