@@ -65,7 +65,7 @@ superscripts(x) = x == 1 ? "" : replace(string(x), (a=>b for (a,b) in zip("-0123
 subscripts(x) = replace(string(x), (a=>b for (a,b) in zip("-01234567890","₋₀₁₂₃₄₅₆₇₈₉"))...)
 
 function Base.show(io::IO, ::MIME"text/plain", a::Braid)
-    println(io, "Braid with $(width(a)) brands of length $(length(a)):")
+    println(io, "Braid (width=$(width(a)), length=$(length(a))):")
     p = powers(a)
     foreach(p) do (i,k)
         print(io, "σ", subscripts(i), superscripts(k))
@@ -74,7 +74,7 @@ function Base.show(io::IO, ::MIME"text/plain", a::Braid)
 end
 
 function Base.show(io::IO, ::MIME"text/latex", a::Braid)
-    println(io, "Braid with $(width(a)) brands of length $(length(a)):")
+    println(io, "Braid in \$B_{$(width(a))}\$ with \$|\\cdot|=$(length(a))\$\n\n")
     p = powers(a)
     print(io, "\$")
     foreach(p) do (i,k)
@@ -85,11 +85,10 @@ function Base.show(io::IO, ::MIME"text/latex", a::Braid)
 end
 
 function Base.show(io::IO, mime::MIME"text/html", a::Braid)
-    println(io, "Braid with $(width(a)) brands of length $(length(a)):")
+    println(io, "<p>Braid (width=$(width(a)), length=$(length(a))):</p>")
     show(io, mime, composed(a, compressed=false))
 end
 
 function Base.show(io::IO, mime::MIME"image/svg+xml", a::Braid)
-    println(io, "Braid with $(width(a)) brands of length $(length(a)):")
     show(io, mime, composed(a, compressed=false))
 end
