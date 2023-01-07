@@ -1,9 +1,7 @@
 "Do an in-place free simplificaton of a, cancelling out consecutive inverses"
 function freesimplify!(a::Braid)
-    length(a) <= 1 && return a
-    
-    i = 1
-    for j = 2:length(a)
+    i = 0
+    for j = 1:length(a)
         #multiplies a[1:i] by a[j:end] and adjust i,j
         if i > 0 && a.els[i] + a.els[j] == 0
             i -= 1
