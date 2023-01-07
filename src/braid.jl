@@ -6,13 +6,15 @@ struct Braid{V<:AbstractVector{Int}}
     end
 end
 
-Braid(v) = Braid(collect(v))
-
 braid(x...) = Braid(Int[x...])
+
+braid(v::AbstractVector{Int}) = Braid(v)
 
 Base.one(::Braid) = braid()
 
 Base.one(::Type{Braid}) = braid()
+
+Base.one(::Type{Braid{V}}) where V<:AbstractVector{Int} = braid()
 
 Base.isempty(a::Braid) = isempty(a.els)
 
