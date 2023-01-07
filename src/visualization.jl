@@ -88,7 +88,3 @@ function Base.show(io::IO, mime::MIME"text/html", a::Braid)
     println(io, "<p>Braid (width=$(width(a)), length=$(length(a))):</p>")
     show(io, mime, composed(a, compressed=false))
 end
-
-function Base.show(io::IO, mime::MIME"image/svg+xml", a::Braid)
-    show(io, mime, composed(a, compressed=false))
-end
