@@ -17,7 +17,7 @@ end
 "Find next *permitted* handle of `a`, return `0,0`` if `a` is already reduced"
 function nexthandle(a::Braid, last = fill(0, width(a)))
     length(a) < 2 && return 0,0
-    last .= 0
+    fill!(last, 0)
     for j = 1:length(a)
         xj,sj = a[j]
         i = last[xj] # i is a candidate
