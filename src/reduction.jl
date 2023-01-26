@@ -82,7 +82,7 @@ end
 "Fetch the main generator of `a`"
 main_generator(a::Braid) = isempty(a) ? 0 : argmin(abs, a.els)
 
-Base.:(<)(a::Braid, b::Braid) = main_generator(reduced!(inv(a)*b)) > 0
+Base.:(<)(a::Braid, b::Braid) = main_generator(reduced!(a\b)) > 0
 
 Base.isless(a::Braid, b::Braid) = a < b
 
