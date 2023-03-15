@@ -1,4 +1,4 @@
-"Do an in-place free simplificaton of a, cancelling out consecutive inverses"
+"Do an in-place free simplificaton of a, recursively cancelling out consecutive inverses"
 function freesimplify!(a::Braid)
     i = 0
     for j = 1:length(a)
@@ -94,6 +94,7 @@ garside_conjugate!(a::Braid) = (a.els .= (width(a) .- abs.(a.els)) .* sign.(a.el
 
 garside_conjugate(a::Braid) = garside_conjugate!(copy(a))
 
+"Compress braid `a` by iterative reduction of garside conjugate"
 function compress(a::Braid)
     a = reduced(a);
     b = reduced!(garside_conjugate(a))

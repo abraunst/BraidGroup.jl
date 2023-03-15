@@ -48,4 +48,5 @@ Base.length(a::Braid) = length(a.els)
 
 Base.show(io::IO, a::Braid) = print(io, "Braid(", a.els, ")")
 
+"Random braid with given width and length"
 randbraid(width, length) = Braid(rand(vcat(-(width-1):-1, 1:width-1), length))
