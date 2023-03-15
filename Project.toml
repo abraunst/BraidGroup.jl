@@ -9,6 +9,8 @@ Compose = "a81c6b42-2e10-5240-aca2-a61377ecd94b"
 
 [compat]
 julia = "1"
+Colors = "0.12"
+Compose = "0.9"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
